@@ -1,0 +1,33 @@
+// Create Constraints
+CREATE CONSTRAINT leader_name_constraint IF NOT EXISTS FOR (l:Leader) REQUIRE l.Name IS UNIQUE;
+CREATE CONSTRAINT organization_name_constraint IF NOT EXISTS FOR (o:Organization) REQUIRE o.Name IS UNIQUE;
+CREATE CONSTRAINT campaign_name_constraint IF NOT EXISTS FOR (c:Campaign) REQUIRE c.`Campaign Name` IS UNIQUE;
+
+
+// Load Leaders
+CALL apoc.load.json('file:///Leaders.json') YIELD value
+WHERE value.Name IS NOT NULL
+MERGE (l:Leader {Name: value.Name})
+SET l += apoc.map.clean(value, ['Name'], []);
+
+
+// Load Organizations
+CALL apoc.load.json('file:///Organizations.json') YIELD value
+WHERE value.Name IS NOT NULL
+MERGE (o:Organization {Name: value.Name})
+SET o += apoc.map.clean(value, ['Name'], []);
+
+
+// Load Campaigns
+CALL apoc.load.json('file:///Campaigns.json') YIELD value
+WHERE value.`Campaign Name` IS NOT NULL
+MERGE (c:Campaign {Name: value.`Campaign Name`})
+SET c += apoc.map.clean(value, ['Campaign Name'], []);
+
+
+// Load Connections and Create Relationships
+LOAD CSV WITH HEADERS FROM 'file:///connections.csv' AS row
+FIELDTERMINATOR ','
+MATCH (from {Name: row.FROM}), (to {Name: row.TO})
+CALL apoc.create.relationship(from, row.TYPE, {}, to) YIELD rel
+RETURN count(*);
