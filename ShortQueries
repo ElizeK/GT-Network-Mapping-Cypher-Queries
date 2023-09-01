@@ -1,0 +1,27 @@
+//Relationships
+MATCH p=()-->() RETURN p LIMIT 25
+
+//Leads relationships
+MATCH p=()-[r:Leads]->() RETURN p LIMIT 25
+
+//Campaigns
+MATCH (n:Campaign) RETURN n LIMIT 25
+
+//European Network
+MATCH (o:Organization)
+WHERE "European Network" IN o.`GT Team Ownership`
+RETURN o;
+
+//US Communities
+MATCH (o:Organization)
+WHERE NOT "European Network" IN o.`GT Team Ownership`
+RETURN o;
+
+//Ukraine
+MATCH (o:Organization)
+WHERE  o.`Country (import)` = "Ukraine"
+RETURN COUNT(o) AS NumberOfNodes;
+
+//Finland
+MATCH (o:Organization {Locations: 'Turku, Finland'})
+RETURN o;
